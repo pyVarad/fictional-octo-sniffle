@@ -1,0 +1,21 @@
+# Select the base image for the project.
+FROM python:3.7.1-alpine3.8
+
+# Install python pip.
+RUN apk update
+
+RUN set -e; \
+    apk add --no-cache --virtual .build-deps \
+        gcc \
+        libc-dev \
+        linux-headers;
+
+# Create volume.
+VOLUME /app
+WORKDIR /app
+
+# Copy the contents of the app directory.
+COPY ./conf/requirements_worker.txt ./requirements.txt
+
+# Run the pip installation.
+RUN pip install -r requirements.txt

@@ -16,6 +16,7 @@ services:
         source: ./app
         target: /app
     command: ["uwsgi", "--socket", "0.0.0.0:5000", "--protocol=http", "-w", "wsgi:application"]
+
   amqp:
     image: varadag/amqp
     hostname: amqp
@@ -27,6 +28,7 @@ services:
       - "15672:15672"
       - "5672:5672"
       - "8080:8080"
+
   nginx:
     build: varadag/nginx
     hostname: nginx
@@ -39,3 +41,20 @@ services:
         - "443:443"
     depends_on:
       - "web"
+
+  worker:
+    image: varadag/libraryworker
+    hostname: library
+    container_name: library
+    build: 
+      context: ./images
+      dockerfile: Dockerfile_library_worker.yml
+    environment:
+      - AMQP_URI=amqp://amqp:5672
+    volumes:
+      - type: bind
+        source: ./app/web/library/workers
+        target: /app
+    depends_on:
+      - "web"
+    command: ["python", "libraryWorker.py"]
