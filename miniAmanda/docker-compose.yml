@@ -1,0 +1,41 @@
+version: '3.2'
+services:
+  web:
+    image: varadag/flaskapp
+    hostname: web
+    container_name: web
+    build: 
+      context: ./images
+      dockerfile: Dockerfile_python.yml
+    ports: 
+      - "5000:5000"
+    environment:
+      - AMQP_URI=amqp://amqp:5672
+    volumes:
+      - type: bind
+        source: ./app
+        target: /app
+    command: ["uwsgi", "--socket", "0.0.0.0:5000", "--protocol=http", "-w", "wsgi:application"]
+  amqp:
+    image: varadag/amqp
+    hostname: amqp
+    container_name: amqp
+    build:
+      context: ./images
+      dockerfile: Dockerfile_amqp.yml
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "8080:8080"
+  nginx:
+    build: varadag/nginx
+    hostname: nginx
+    container_name: frontend
+    build:
+      context: ./images
+      dockerfile: Dockerfile_nginx.yml
+    ports:
+        - "80:80"
+        - "443:443"
+    depends_on:
+      - "web"

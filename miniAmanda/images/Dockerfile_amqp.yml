@@ -1,0 +1,16 @@
+FROM rabbitmq:3.7.13-alpine
+
+# PORTS
+EXPOSE 15672 5672 8080
+
+# Enable Management plugin
+RUN rabbitmq-plugins enable rabbitmq_management &&  \
+    rabbitmq-server -detached
+
+# Add custom configuration for rabbitmq.
+WORKDIR /etc/rabbitmq
+COPY ./conf/rabbitmq.config .
+COPY ./conf/definitions.json .
+
+# Detached.
+CMD ["rabbitmq-server", "start"]
