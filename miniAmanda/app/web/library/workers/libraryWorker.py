@@ -19,7 +19,9 @@ class Worker(ConsumerProducerMixin):
 		)]
 
 	def on_request(self, message):
-		result = "Recieved Message from {0}".format(message.payload['user'])
+		result = "Recieved Message from {0}".format(
+			message.payload.get('user') or message.properties['correlation_id']
+		)
 		print(message.payload)
 
 		self.producer.publish(
